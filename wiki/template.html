@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css">
+	
+	<title>{{ .Title }}</title>
+</head>
+<body>
+	<div class="main-container">
+	<span><a href="/">home</a></span>
+	<div><span class="file-name">/{{ .Title }}</span>.md</div>
+	<div class="markdown-wrapper">
+	<article class="markdown-body">
+			{{ .Body }}	
+	</article>
+	</div>
+	</div>
+</body>
+</html>
+
+<style>
+	.file-name {
+		font-size: 17px;
+		font-weight: 400;
+		margin-top: 0;
+		margin-bottom: 0;
+		background-color: rgb(254, 206, 168);
+		padding: 2px 4px;
+		border-radius: 2px;
+	}
+	.main-container {
+		padding: 20px 220px;
+	}
+
+	.markdown-wrapper {
+		margin-top: 90px;
+	}
+</style>
