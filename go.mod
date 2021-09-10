@@ -3,6 +3,6 @@ module github.com/hawyar/gowiki
 go 1.16
 
 require (
-	github.com/yuin/goldmark v1.4.0
-	github.com/yuin/goldmark-meta v1.0.0
+	github.com/gofiber/fiber/v2 v2.18.0
+	github.com/gofiber/template v1.6.16
 )

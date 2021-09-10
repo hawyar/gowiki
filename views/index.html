@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ .Title }} </title>
+	<link rel="stylesheet" href="css/style.css">
+	<!-- add a favicon -->
+	<link rel="icon" href="https://consensusnetworks.com/wp-content/uploads/2018/09/footer-logo-100x100.png" type="image/x-icon" />
+</head>
+
+<body>
+	<div class="main">
+		<nav class="sidenav">
+			<div class="links">
+			{{ range .Nav }}
+			<a href={{ .Ref }} class="link">{{ .Name }}</a>
+			{{ end }}
+		</div>
+		</nav>
+
+		<div class="content">
+			<div class="org_detail">
+				<h1 class="header">{{.Header}}</h1>
+				<p class="about">{{ .About }}</p>
+					</a></p>
+			</div>
+
+			<div class="quick_access">
+				<h3 class="section_header">Quick access</h3>
+				<div class="quick_access_wrapper">
+				{{ range .QuickAccess }}
+				<div class="quick_access_card">
+					<a class="link open_source_item" href={{ .Ref }}>{{ .Name }}</a>
+					<img class="mama" src="svg/github.svg">
+				</div>
+				{{ end }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="js/script.js">
+	</script>
+</body>
+
+</html>

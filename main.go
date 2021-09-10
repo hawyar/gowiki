@@ -1,115 +1,73 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"text/template"
 
-	"github.com/yuin/goldmark"
-	meta "github.com/yuin/goldmark-meta"
-	"github.com/yuin/goldmark/parser"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
 )
 
-
-type Page struct {
-	Title string
-	Body  []byte
+type project struct {
+	Name string `json: "name"`
+	Ref  string `json: "ref"`
 }
 
-func (p *Page) save() error {
-	filename := p.Title + ".md"
-	return ioutil.WriteFile("content/" + filename, p.Body, 0600)
+type nav struct {
+	Name string `json: "name"`
+	Ref  string `json: "ref"`
 }
-
-func loadPage(title string) (*Page, error) {
-	filename := title + ".md"
-	body, err := ioutil.ReadFile("content/" + filename)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Page{Title: title, Body: body}, nil
-}
-
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/view/"):]
-	t, _ := template.ParseFiles("view/" + "template.html")
-	p, _ := loadPage(title)
-	// send back the page as a HTML file
-	t.Execute(w, p)
-}
-
-type WikiPageContent struct {
-	Title string
-	Body  string
-	Author string
-	Summary string
-}
-
-func wikiPageHandler(w http.ResponseWriter, r *http.Request) {
-	title := r.URL.Path[len("/wiki/"):]
-	log.Print("generated page > " + title + ".md")
-	p, err := loadPage(title)
-
-	if err != nil {
-		log.Print(err)
-		p = &Page{Title: title, Body: []byte("")}
-	}
-
-	
-	 markdown := goldmark.New(
-        goldmark.WithExtensions(
-            meta.Meta,
-        ),
-    )
-    source := p.Body
-
-    var buf bytes.Buffer
-
-    context := parser.NewContext()
-	
-    if err := markdown.Convert([]byte(source), &buf, parser.WithContext(context)); err != nil {
-        panic(err)
-    }
-    metaData := meta.Get(context)
-    frontmatterTitle := metaData["Title"]
-	// frontmatterAuthor := metaData["Author"]
-
-    fmt.Print(frontmatterTitle)
-	// new wiki page content
-	wikiPageContent := WikiPageContent{Title: title, Body: buf.String()}
-	
-	t, _ := template.ParseFiles("wiki/" + "template.html")
-	t.Execute(w, wikiPageContent)
-}
-
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	files, _ := ioutil.ReadDir("content")
-
-	// get names of all files in the directory
-	fileNames := make([]string, len(files))
-	
-	for i, file := range files {
-		fileNames[i] = file.Name()
-	}
-
-	t, _ := template.ParseFiles("static/index.html")
-	t.Execute(w, fileNames)
-}
-
 
 func main() {
-	server := http.Server{
-        Addr: "127.0.0.1:8080",
-    }
-	
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	engine := html.New("./views", ".html")
 
-	http.HandleFunc("/wiki/", wikiPageHandler)
+	app := fiber.New(fiber.Config{
+		Views: engine,
+	})
+	app.Static("/", "./public")
 
-	log.Fatal(server.ListenAndServe())
+	QuickAccess := []project{
+		{
+			Name: "Github Organization",
+			Ref:  "https://github.com/consensusnetworks",
+		},
+		{
+			Name: "Jira Board",
+			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
+		},
+		{
+			Name: "HealthNet Graphql Docs",
+			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
+		},
+		{
+			Name: "Whitepaper",
+			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
+		},
+	}
+
+	nav := []nav{
+		{
+			Name: "Introduction",
+			Ref:  "https://github.com/hawyar",
+		},
+		{
+			Name: "videohive",
+			Ref:  "https://videohive.net/user/hawyar/portfolio",
+		},
+		{
+			Name: "dribbble",
+			Ref:  "https://dribbble.com/Hawyar",
+		},
+	}
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Render("index", fiber.Map{
+			"Title":    "Consensus Networks",
+			"Header": "Consensus Networks",
+			"QuickAccess": QuickAccess,
+			"About": "HealthNet, is a HIPAA-compliant Platform-as-a-Service that medical IoT (IoMT) devices can plug into for highly traceable data management, security, and provenance, while leveraging EHR integration capabilities.",
+			"Nav":      nav,
+		})
+	})
+
+	log.Fatal(app.Listen(":3000"))
 }
