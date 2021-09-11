@@ -31,13 +31,15 @@
 				<h3 class="section_header">Quick access</h3>
 				<div class="quick_access_wrapper">
 				{{ range .QuickAccess }}
-				<div class="quick_access_card">
-					<a class="link open_source_item" href={{ .Ref }}>{{ .Name }}</a>
-					<img class="mama" src="svg/github.svg">
-				</div>
+				<a class="quick_access_card link" href={{ .Ref }}>
+					<span class="link open_source_item">{{ .Name }}</span>
+					<img class="" src={{ .Icon}}>
+				</a>
+		
 				{{ end }}
 				</div>
 			</div>
+			
 		</div>
 	</div>
 	<script src="js/script.js">

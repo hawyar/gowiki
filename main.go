@@ -7,9 +7,10 @@ import (
 	"github.com/gofiber/template/html"
 )
 
-type project struct {
+type quickAccess struct {
 	Name string `json: "name"`
 	Ref  string `json: "ref"`
+	Icon string `json: "icon"`
 }
 
 type nav struct {
@@ -23,24 +24,24 @@ func main() {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+
 	app.Static("/", "./public")
 
-	QuickAccess := []project{
+	QuickAccess := []quickAccess{
 		{
-			Name: "Github Organization",
-			Ref:  "https://github.com/consensusnetworks",
+			Name: "Current Sprint",
+			Ref:  "https://consensusnetworks.atlassian.net/jira/software/projects/HEAL/boards/3",
+			Icon: "svg/jira.svg",
 		},
 		{
-			Name: "Jira Board",
-			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
-		},
-		{
-			Name: "HealthNet Graphql Docs",
-			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
+			Name: "HealthNet GraphQL Docs",
+			Ref:  "https://healthnet-graphql-docs.herokuapp.com/",
+			Icon: "svg/graphql.svg",
 		},
 		{
 			Name: "Whitepaper",
 			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
+			Icon: "svg/book.svg",
 		},
 	}
 
@@ -59,13 +60,17 @@ func main() {
 		},
 	}
 
+	about := "HealthNet, is a HIPAA-compliant Platform-as-a-Service that medical IoT (IoMT) devices can plug into for highly traceable data management, security, and provenance, while leveraging EHR integration capabilities."
+
+
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.Render("index", fiber.Map{
 			"Title":    "Consensus Networks",
 			"Header": "Consensus Networks",
 			"QuickAccess": QuickAccess,
-			"About": "HealthNet, is a HIPAA-compliant Platform-as-a-Service that medical IoT (IoMT) devices can plug into for highly traceable data management, security, and provenance, while leveraging EHR integration capabilities.",
-			"Nav":      nav,
+			"About": about,
+			"Nav": nav,
 		})
 	})
 
