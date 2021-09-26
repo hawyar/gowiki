@@ -1,78 +1,42 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"log"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html"
+	"github.com/labstack/echo"
 )
 
-type quickAccess struct {
-	Name string `json: "name"`
-	Ref  string `json: "ref"`
-	Icon string `json: "icon"`
-}
+// credits:
+// https://github.com/dstotijn/golang-nextjs-portable
 
-type nav struct {
-	Name string `json: "name"`
-	Ref  string `json: "ref"`
+//go:embed docs/dist
+//go:embed docs/dist/_next
+//go:embed docs/dist/_next/static/chunks/pages/*.js
+//go:embed docs/dist/_next/static/*/*.js
+var nextFS embed.FS
+
+func loadDocs() fs.FS {
+	// Load the Next.js app's `dist` folder.
+	distFS, err := fs.Sub(nextFS, "docs/dist")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return distFS
 }
 
 func main() {
-	engine := html.New("./views", ".html")
 
-	app := fiber.New(fiber.Config{
-		Views: engine,
-	})
+	e := echo.New()
+	
+	docsHttpFs := http.FS(loadDocs())
+	fsServer := http.FileServer(docsHttpFs)
+	e.GET("/*", echo.WrapHandler(fsServer))
 
-	app.Static("/", "./public")
-
-	QuickAccess := []quickAccess{
-		{
-			Name: "Current Sprint",
-			Ref:  "https://consensusnetworks.atlassian.net/jira/software/projects/HEAL/boards/3",
-			Icon: "svg/jira.svg",
-		},
-		{
-			Name: "HealthNet GraphQL Docs",
-			Ref:  "https://healthnet-graphql-docs.herokuapp.com/",
-			Icon: "svg/graphql.svg",
-		},
-		{
-			Name: "Whitepaper",
-			Ref:  "https://github.com/hawyar/gatsby-graphcms-starter",
-			Icon: "svg/book.svg",
-		},
-	}
-
-	nav := []nav{
-		{
-			Name: "Introduction",
-			Ref:  "https://github.com/hawyar",
-		},
-		{
-			Name: "videohive",
-			Ref:  "https://videohive.net/user/hawyar/portfolio",
-		},
-		{
-			Name: "dribbble",
-			Ref:  "https://dribbble.com/Hawyar",
-		},
-	}
-
-	about := "HealthNet, is a HIPAA-compliant Platform-as-a-Service that medical IoT (IoMT) devices can plug into for highly traceable data management, security, and provenance, while leveraging EHR integration capabilities."
+	
 
 
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.Render("index", fiber.Map{
-			"Title":    "Consensus Networks",
-			"Header": "Consensus Networks",
-			"QuickAccess": QuickAccess,
-			"About": about,
-			"Nav": nav,
-		})
-	})
-
-	log.Fatal(app.Listen(":3000"))
+	e.Logger.Fatal(e.Start(":3000"))
 }

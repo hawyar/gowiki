@@ -4,43 +4,37 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ .Title }} </title>
-	<link rel="stylesheet" href="css/style.css">
-	<!-- add a favicon -->
+	<title>{{ .page.Title }} </title>
+	<link rel="stylesheet" href="css/index.css">
 	<link rel="icon" href="https://consensusnetworks.com/wp-content/uploads/2018/09/footer-logo-100x100.png" type="image/x-icon" />
+	<script src="js/script.js"></script>
+	<link rel="stylesheet"
+      href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
 </head>
 
 <body>
+	{{ .user }}
 	<div class="main">
-		<nav class="sidenav">
+		<nav class="nav">
+			<span class="text-logo"{{ .page.Header }}></span>
 			<div class="links">
-			{{ range .Nav }}
-			<a href={{ .Ref }} class="link">{{ .Name }}</a>
-			{{ end }}
-		</div>
+			<a href="/" class="link">Home</a>
+			<a href="/" class="link">Home</a>
+			<a href="/" class="link">Home</a>
+			<a href="/" class="link">Home</a>			
+			</div>
+			<div class="push">
+				<a href="/login/github">Log in with Github</span>
+			</div>
 		</nav>
 
-		<div class="content">
+	<div class="content">
 			<div class="org_detail">
 				<h1 class="header">{{.Header}}</h1>
 				<p class="about">{{ .About }}</p>
-					</a></p>
 			</div>
-
-			<div class="quick_access">
-				<h3 class="section_header">Quick access</h3>
-				<div class="quick_access_wrapper">
-				{{ range .QuickAccess }}
-				<a class="quick_access_card link" href={{ .Ref }}>
-					<span class="link open_source_item">{{ .Name }}</span>
-					<img class="" src={{ .Icon}}>
-				</a>
-		
-				{{ end }}
-				</div>
-			</div>
-			
-		</div>
+	</div>
 	</div>
 	<script src="js/script.js">
 	</script>

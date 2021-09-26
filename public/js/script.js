@@ -1,1 +1,2 @@
-console.log('coming hot from script')
+console.log('coming hot from go')
+hljs.highlightAll()
