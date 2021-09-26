@@ -7,27 +7,28 @@ import {
   ListItem,
 } from '@chakra-ui/react'
 import { CheckCircleIcon, LinkIcon } from '@chakra-ui/icons'
+import { useState, useEffect } from 'react'
+const Index = () => {
+	const [user, setUser] = useState(null)
 
-import { Hero } from '../components/Hero'
-import { Container } from '../components/Container'
-import { Main } from '../components/Main'
-import { DarkModeSwitch } from '../components/DarkModeSwitch'
-import { CTA } from '../components/CTA'
-import { Footer } from '../components/Footer'
+	useEffect(() => {
+		// fetch the user from the go server
+		fetch('api/me')
+			.then(res => res.json())
+			.then(user => {
+				setUser(user)
+			}
+		)
+	}, [])
 
-const Index = () => (
-  <Container height="100vh">
-    <Hero />
+	return (
+		<div>
+			<a href="api/github"> login </a>
+			<a href="api/github"> logout </a>
 
-	<a href="api/github"> login </a>
-
-
-    <DarkModeSwitch />
-    <Footer>
-      <Text>Next ❤️ Chakra</Text>
-    </Footer>
-    <CTA />
-  </Container>
-)
+			{ user ? JSON.stringify(user, null, 2) : 'unauthorized' }
+		</div>
+	)
+}
 
 export default Index
