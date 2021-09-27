@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"embed"
 	"fmt"
 	"io"
@@ -23,48 +22,65 @@ import (
 //go:embed docs/dist/_next
 //go:embed docs/dist/_next/static/chunks/pages/*.js
 //go:embed docs/dist/_next/static/*/*.js
-var nextFS embed.FS
+var docs embed.FS
 
 func loadDocs() fs.FS {
 	// Load the Next.js app's `dist` folder.
-	distFS, err := fs.Sub(nextFS, "docs/dist")
+			nextFs, err := fs.Sub(docs, "docs/dist")
 	if err != nil {
 		log.Fatal(err)
 	}
-	return distFS
+	return nextFs
 }
 
 var config = &oauth2.Config{
-		ClientID:     loadEnv("GITHUB_CLIENT_ID"),
-		ClientSecret: loadEnv("GITHUB_CLIENT_SECRET"),
-		RedirectURL:  "http://localhost:8080/github/callback",
-		Endpoint:     githubOAuth2.Endpoint,
-	}
+	ClientID:     loadEnv("GITHUB_CLIENT_ID"),
+	ClientSecret: loadEnv("GITHUB_CLIENT_SECRET"),
+	RedirectURL:  "http://localhost:8080/github/callback",
+	Endpoint:     githubOAuth2.Endpoint,
+}
 
 func main() {
 
 	e := echo.New()
-	
+
 	docsHttpFs := http.FS(loadDocs())
-	fsServer := http.FileServer(docsHttpFs)
+	docsFs := http.FileServer(docsHttpFs)
 
-
-	e.GET("/*", echo.WrapHandler(fsServer))
-
+	e.GET("/*", echo.WrapHandler(docsFs))
 
 	// prepend the `/api` prefix to catch requests from the Next.js app
-    e.GET("api/github", githubLoginHandler)
-
-    e.GET("github/callback", githubCallbackHandler)
-
-    // Route where the authenticated user is redirected to
-    // http.HandleFunc("/loggedin", func(w http.ResponseWriter, r *http.Request) {
-    //     loggedinHandler(w, r, "")
-    // })
+	e.GET("api/github", githubLoginHandler)
+	e.GET("github/callback", githubCallbackHandler)
 	e.GET("/api", handleAPI)
 
-	e.GET("/api/me", handlUser)
+	e.GET("/api/me", func(c echo.Context) error {
 
+		// eventully pull all these from github and jira api
+		type User struct {
+			Name  string `json:"name" xml:"name"`
+			Email string `json:"email" xml:"email"`
+		}
+
+		u := &User{
+			Name:  "testing",
+			Email: "test@testing.com",
+		}
+
+		type Org struct {
+			Name string `json:"name" xml:"name"`
+			Desc string `json:"desc" xml:"desc"`
+		}
+
+		o := &Org{
+			Name: "Consens Networks",
+			Desc: "Organziation description goes here",
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"user":  u,
+			"org":   o,
+		})
+	})
 
 	fmt.Println("http://localhost:8080")
 	e.Logger.Fatal(e.Start(":8080"))
@@ -75,68 +91,34 @@ func githubLoginHandler(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func getToken(db *sql.DB) (string, error) {
-	var token string
-	err := db.QueryRow("select access_token from github_token").Scan(&token)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
-}
-
-func insertToken(db *sql.DB, token string) error {
-	stmt, err := db.Prepare("insert into github_token (access_token) values (?)")
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(token)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func createTable(db *sql.DB) error {
-	_, err := db.Exec(`
-		create table if not exists github_token (
-			access_token text
-		)
-	`)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
+// func createTable(db *sql.DB) error {
+// 	_, err := db.Exec(`
+// 		create table if not exists github_token (
+// 			access_token text
+// 		)
+// 	`)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func githubCallbackHandler(c echo.Context) error {
-
 	ctx := context.Background()
 	code := c.QueryParam("code")
 
+	fmt.Println("code", code)
+
 	token, err := config.Exchange(ctx, code)
 
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "failed to get token")
-	}
-
-	// insert token into database
-	db, err := sql.Open("sqlite3", "./db.sqlite3")
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "failed to open database")
-	}
-	defer db.Close()
-	
-
-	err = insertToken(db, token.AccessToken)
+	fmt.Println("token", token)
 
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "failed to insert token")
+		return err
 	}
-
 
 	client := config.Client(ctx, token)
-	
+
 	resp, err := client.Get("https://api.github.com/user")
 
 	if err != nil {
@@ -151,18 +133,8 @@ func githubCallbackHandler(c echo.Context) error {
 	}
 
 	fmt.Println(string(contents))
-		
-	// if user exists then redirc to /loggedin
-	// else create user and redirect to /loggedin
-	
-	return c.Redirect(http.StatusTemporaryRedirect, "/")
-}
 
-func handlUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"name": "John Doe",
-	})
-
+	return c.Redirect(http.StatusTemporaryRedirect, "/docs")
 }
 
 func loadEnv(key string) string {
@@ -174,7 +146,6 @@ func loadEnv(key string) string {
 
 	return os.Getenv(key)
 }
-
 
 func handleAPI(c echo.Context) error {
 	profile := pprof.Lookup("allocs")

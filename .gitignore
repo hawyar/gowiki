@@ -1,1 +1,5 @@
 .env
+github.db
+docs/.env
+docs/db
+docs/node_modules
