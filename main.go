@@ -26,7 +26,7 @@ var docs embed.FS
 
 func loadDocs() fs.FS {
 	// Load the Next.js app's `dist` folder.
-			nextFs, err := fs.Sub(docs, "docs/dist")
+	nextFs, err := fs.Sub(docs, "docs/dist")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,6 +38,18 @@ var config = &oauth2.Config{
 	ClientSecret: loadEnv("GITHUB_CLIENT_SECRET"),
 	RedirectURL:  "http://localhost:8080/github/callback",
 	Endpoint:     githubOAuth2.Endpoint,
+}
+
+// eventully pull all these from github and jira api
+
+type Org struct {
+	Name string `json:"name" xml:"name"`
+	Desc string `json:"desc" xml:"desc"`
+}
+
+type User struct {
+	Name  string `json:"name" xml:"name"`
+	Email string `json:"email" xml:"email"`
 }
 
 func main() {
@@ -56,20 +68,9 @@ func main() {
 
 	e.GET("/api/me", func(c echo.Context) error {
 
-		// eventully pull all these from github and jira api
-		type User struct {
-			Name  string `json:"name" xml:"name"`
-			Email string `json:"email" xml:"email"`
-		}
-
 		u := &User{
 			Name:  "testing",
 			Email: "test@testing.com",
-		}
-
-		type Org struct {
-			Name string `json:"name" xml:"name"`
-			Desc string `json:"desc" xml:"desc"`
 		}
 
 		o := &Org{
@@ -77,8 +78,8 @@ func main() {
 			Desc: "Organziation description goes here",
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"user":  u,
-			"org":   o,
+			"user": u,
+			"org":  o,
 		})
 	})
 

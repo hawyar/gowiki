@@ -6,13 +6,13 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-export const Sidebar = (props: FlexProps) => {
+export const QuickAccess = (props: FlexProps) => {
   const { colorMode } = useColorMode();
 
-  const bg = useColorModeValue("gray.100", "gray.900");
+  const bg = useColorModeValue("red.100", "orange.900");
 
   return (
-    <Box px={5} py={6} w={["100%", "180px"]} minHeight="100vh" bg={bg}>
+    <Box px={5} py={6} w="220px" h="120px" bg={bg}>
       <Text letterSpacing="-.6px" fontSize="" fontWeight="semibold">
         Documentation
       </Text>

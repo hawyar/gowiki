@@ -15,13 +15,19 @@ import {
   Button,
   IconButton,
   useColorModeValue,
+  Menu,
+  MenuButton,
+  MenuGroup,
+  MenuList,
+  MenuItem,
+  MenuDivider,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export const Nav = (props) => {
   const { colorMode, toggleColorMode } = useColorMode();
 
-  const bg = useColorModeValue("brand.black", "brand.purple");
+  const bg = useColorModeValue("gray.50", "gray.800");
   const color = useColorModeValue("brand.white", "brand.black");
   const border = useColorModeValue("1px solid #e6e6e6", "1px solid #2D3748");
   return (
@@ -35,8 +41,8 @@ export const Nav = (props) => {
       position="fixed"
       top={0}
       w="100%"
-      overflow="hidden"
       borderBottom={border}
+      bg={bg}
     >
       <Flex
         direction="row"
@@ -54,17 +60,16 @@ export const Nav = (props) => {
             icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
           />
 
-          <Box size="lg" borderRadius="full" display="flex">
+          <Box size="lg" borderRadius="full" display="flex" alignItems="center">
             <Avatar
               src="https://avatars.githubusercontent.com/u/42186608?v=4"
-              size="xs"
+              size="sm"
               name="Hawyar Fa"
               ml={-1}
               mr={2}
             />
-            <Text letterSpacing="-.6px" fontWeight="normal">
-              Hawyar
-            </Text>
+
+            <AccountMenu />
           </Box>
         </Box>
       </Flex>
@@ -79,5 +84,26 @@ const Logo = () => {
     <Text fontSize="md" fontWeight="semibold" letterSpacing="tight">
       Consensus Networks
     </Text>
+  );
+};
+
+const AccountMenu = () => {
+  return (
+    <Menu>
+      <MenuButton as={Button} bg="none" size="sm">
+        thuggster
+      </MenuButton>
+      <MenuList>
+        <MenuGroup title="Profile">
+          <MenuItem>My Account</MenuItem>
+          <MenuItem>Payments </MenuItem>
+        </MenuGroup>
+        <MenuDivider />
+        <MenuGroup title="Help">
+          <MenuItem>Docs</MenuItem>
+          <MenuItem>FAQ</MenuItem>
+        </MenuGroup>
+      </MenuList>
+    </Menu>
   );
 };
