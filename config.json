@@ -1,10 +1,10 @@
 {
-	"org": "Consensus Networks",
-	"description": "Consensus Networks is a blockchain-based network that enables the creation of a decentralized network of trust and consensus. Consensus Networks is a peer-to-peer network that enables the creation of a decentralized network of trust and consensus. Consensus Networks is a peer-to-peer network that enables the creation of a decentralized network of trust and consensus.",
-	"website": "https://www.consensusnetworks.com/",
+	"org": "Acme Networks",
+	"description": "More description on Acme and its ground breaking innovations",
+	"website": "acme[dot]com",
 	"social": {
-		"twitter": "https://twitter.com/consensusnet",
-		"github": "https://github.com/consensusnetworks"
+		"twitter": "https://twitter.com/acme",
+		"github": "https://github.com/acme"
 	},
-	"logo": "https://www.consensusnetworks.com/wp-content/uploads/2018/01/logo-consensus-networks-white.png"
+	"logo": "some/link/on/net/acme/logo"
 }

@@ -1,5 +1,7 @@
 
-watch:
+BUILD=build
+
+dev:
 	air main.go
 
 docs:
@@ -8,8 +10,10 @@ docs:
 caddy:
 	caddy run
 
-build:
-	make docs && go build -o bin/main main.go
+server:
+	go build -o $(BUILD)/main main.go
 
 run:
-	make build && bin/main
+	$(BUILD)/main
+
+
