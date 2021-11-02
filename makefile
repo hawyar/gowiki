@@ -1,11 +1,15 @@
-run:
-	go run main.go
-
-build:
-	go build main.go
 
 watch:
-	air main.go handler.go
+	air main.go
 
-build-docs:
+docs:
 	cd docs && npm run build && npm run export
+
+caddy:
+	caddy run
+
+build:
+	make docs && go build -o bin/main main.go
+
+run:
+	make build && bin/main

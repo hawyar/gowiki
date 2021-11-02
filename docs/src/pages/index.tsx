@@ -22,8 +22,6 @@ import { Sidebar } from "../components/Sidebar";
 import { getAllContents } from "../lib/api";
 import { QuickAccess } from "../components/QuickAccess";
 const Index = ({ allContent }) => {
-  console.log(allContent);
-
   //   const fetcher = (args) => fetch(args).then((res) => res.json());
 
   //   const { data, error } = useSWR("/api/me", fetcher);
@@ -39,26 +37,37 @@ const Index = ({ allContent }) => {
     <div>
       <Nav />
       <Stack direction={["column", "row"]} spacing={16} pt={12} bg={bg}>
-        <Sidebar />
-        <Box bg={bg} py={6}>
+        <Sidebar docs={allContent} />
+        <Box bg={bg} pl={56}>
           <Stack direction="column" spacing="24px">
-            <Heading letterSpacing="-1px" size="2xl" fontWeight="bold" pt={8}>
-              Welcome to the docs team!
+            <Heading letterSpacing="-1px" size="xl" fontWeight="bold" pt={16}>
+              Welcome to the docs!
             </Heading>
-            <Box>
+            <Box pt="16">
               <QuickAccess />
             </Box>
           </Stack>
-          {/*{JSON.stringify(heroPost, null, 2)}*/}
         </Box>
-        <Flex bg={bg} py={6} pl={32} direction="column" spacing="24px">
-          <Text letterSpacing="-.3px" fontSize="md" fontWeight="medium" pt={8}>
+        <Flex
+          // Nav is ~49px tall
+          position="fixed"
+          top={"48px" + 12}
+          right="12em"
+          direction="column"
+          spacing="24px"
+        >
+          <Text
+            letterSpacing="-.3px"
+            fontSize="md"
+            fontWeight="semibold"
+            pt={8}
+          >
             Table of Content
           </Text>
           <Box pt={4}>
             {allContent.map((doc) => {
               return (
-                <Text>
+                <Text key={doc.slug}>
                   <Link color="teal.500" href={`docs/${doc.slug}`}>
                     {doc.title}
                   </Link>

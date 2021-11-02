@@ -1,43 +1,50 @@
-import fs from "fs";
-import { join } from "path";
-import matter from "gray-matter";
+import { readFileSync, readdirSync } from 'fs'
+import { join } from 'path'
+import matter from 'gray-matter'
 
-const contentDir = join(process.cwd(), "_content");
+function getContentPath() {
+  let contentDir = process.cwd().split('/')
+  contentDir.pop()
+  contentDir.push('content')
+  return contentDir.join('/')
+}
+
+let contentDir = '/Users/hawyar/go/src/github.com/hawyar/gowiki/content'
 
 export function getContentSlugs() {
-	return fs.readdirSync(contentDir);
+  return readdirSync(getContentPath())
 }
 
 export function getContentBySlug(slug, fields = []) {
-	const realSlug = slug.replace(/\.md$/, "");
-	const fullPath = join(contentDir, `${realSlug}.md`);
-	const fileContents = fs.readFileSync(fullPath, "utf8");
-	const { data, content } = matter(fileContents);
+  const realSlug = slug.replace(/\.md$/, '')
+  const fullPath = join(contentDir, `${realSlug}.md`)
+  const fileContents = readFileSync(fullPath, 'utf8')
 
-	const items = {};
+  const { data, content } = matter(fileContents)
 
-	// Ensure only the minimal needed data is exposed
-	fields.forEach((field) => {
-		if (field === "slug") {
-			items[field] = realSlug;
-		}
-		if (field === "content") {
-			items[field] = content;
-		}
+  let items = {}
 
-		if (typeof data[field] !== "undefined") {
-			items[field] = data[field];
-		}
-	});
+  // Ensure only the minimal needed data is exposed
+  fields.forEach((field) => {
+    if (field === 'slug') {
+      items[field] = realSlug
+    }
+    if (field === 'content') {
+      items[field] = content
+    }
 
-	return items;
+    if (typeof data[field] !== 'undefined') {
+      items[field] = data[field]
+    }
+  })
+
+  return items
 }
 
 export function getAllContents(fields = []) {
-	const slugs = getContentSlugs();
-	const posts = slugs
-		.map((slug) => getContentBySlug(slug, fields))
-		// sort posts by date in descending order
-		.sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
-	return posts;
+  const slugs = getContentSlugs()
+  const posts = slugs
+    .map((slug) => getContentBySlug(slug, fields))
+    .sort((post1, post2) => (post1.date > post2.date ? -1 : 1))
+  return posts
 }

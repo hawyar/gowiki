@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/fs"
@@ -14,6 +15,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/michaeljs1990/sqlitestore"
 	"golang.org/x/oauth2"
 	githubOAuth2 "golang.org/x/oauth2/github"
 )
@@ -24,8 +26,11 @@ import (
 //go:embed docs/dist/_next/static/*/*.js
 var docs embed.FS
 
+// sqlite store
+var store *sqlitestore.SqliteStore
+
 func loadDocs() fs.FS {
-	// Load the Next.js app's `dist` folder.
+	// load the Next.js app's `dist` folder.
 	nextFs, err := fs.Sub(docs, "docs/dist")
 	if err != nil {
 		log.Fatal(err)
@@ -48,8 +53,18 @@ type Org struct {
 }
 
 type User struct {
-	Name  string `json:"name" xml:"name"`
-	Email string `json:"email" xml:"email"`
+	Login     string `json:"login" xml:"login"`
+	Id        int    `json:"id" xml:"id"`
+	AvatarURL string `json:"avatar_url" xml:"avatar_url"`
+	HtmlUrl   string `json:"html_url" xml:"html_url"`
+}
+
+func init() {
+	var err error
+	store, err = sqlitestore.NewSqliteStore("./database", "sessions", "/", 3600, []byte("<SecretKey>"))
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -60,31 +75,35 @@ func main() {
 	docsFs := http.FileServer(docsHttpFs)
 
 	e.GET("/*", echo.WrapHandler(docsFs))
+	e.GET("/api", handleAPI)
 
-	// prepend the `/api` prefix to catch requests from the Next.js app
 	e.GET("api/github", githubLoginHandler)
 	e.GET("github/callback", githubCallbackHandler)
-	e.GET("/api", handleAPI)
 
 	e.GET("/api/me", func(c echo.Context) error {
 
-		u := &User{
-			Name:  "testing",
-			Email: "test@testing.com",
+		session, err := store.Get(c.Request(), "auth")
+
+		fmt.Println("session", session)
+
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, "")
 		}
 
-		o := &Org{
-			Name: "Consens Networks",
-			Desc: "Organziation description goes here",
+		user := session.Values["user"]
+
+		if user == nil {
+			return c.JSON(http.StatusUnauthorized, "")
 		}
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"user": u,
-			"org":  o,
-		})
+
+		fmt.Println("user", user)
+		return c.JSON(http.StatusOK, user)
 	})
 
 	fmt.Println("http://localhost:8080")
-	e.Logger.Fatal(e.Start(":8080"))
+
+	port := ":8080"
+	e.Logger.Fatal(e.Start(port))
 }
 
 func githubLoginHandler(c echo.Context) error {
@@ -106,45 +125,75 @@ func githubLoginHandler(c echo.Context) error {
 
 func githubCallbackHandler(c echo.Context) error {
 	ctx := context.Background()
-	code := c.QueryParam("code")
 
-	fmt.Println("code", code)
+	code := c.QueryParam("code")
 
 	token, err := config.Exchange(ctx, code)
 
-	fmt.Println("token", token)
+	if err != nil {
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+
+	}
+	user, err := getUserFromGithub(token.AccessToken)
 
 	if err != nil {
-		return err
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 
-	client := config.Client(ctx, token)
+	session, err := store.Get(c.Request(), "auth")
+
+	if err != nil {
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	session.Values["user"] = user
+
+	err = session.Save(c.Request(), c.Response())
+
+	if err != nil {
+		return c.Redirect(http.StatusTemporaryRedirect, "/")
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, "/")
+
+}
+
+func getUserFromGithub(token string) (*User, error) {
+	ctx := context.Background()
+	client := config.Client(ctx, &oauth2.Token{AccessToken: token})
 
 	resp, err := client.Get("https://api.github.com/user")
 
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "failed to get profile")
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
 	contents, err := io.ReadAll(resp.Body)
+
+	fmt.Println("contents", string(contents))
+
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "failed to read response")
+		return nil, err
 	}
 
-	fmt.Println(string(contents))
+	user := &User{}
 
-	return c.Redirect(http.StatusTemporaryRedirect, "/docs")
+	err = json.Unmarshal(contents, user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func loadEnv(key string) string {
-
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
-
 	return os.Getenv(key)
 }
 

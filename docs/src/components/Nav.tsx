@@ -22,6 +22,7 @@ import {
   MenuItem,
   MenuDivider,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 
 export const Nav = (props) => {
@@ -43,6 +44,7 @@ export const Nav = (props) => {
       w="100%"
       borderBottom={border}
       bg={bg}
+      zIndex="33"
     >
       <Flex
         direction="row"
@@ -81,9 +83,9 @@ export const Nav = (props) => {
 
 const Logo = () => {
   return (
-    <Text fontSize="md" fontWeight="semibold" letterSpacing="tight">
-      Consensus Networks
-    </Text>
+	   <Text fontSize="md" fontWeight="semibold" letterSpacing="tight">
+            <Link href="/">   Consensus Networks</Link>
+          </Text>
   );
 };
 
