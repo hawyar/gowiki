@@ -1,124 +1,103 @@
 import {
-	Link as ChakraLink,
-	Text,
-	Code,
-	List,
-	ListIcon,
-	ListItem,
-	HStack,
-	Heading,
-	Box,
-	SimpleGrid,
-	Stack,
-	Flex,
 	Link,
-	Grid,
-	useColorModeValue,
+	Box,
+	Flex,
+	Stack,
 } from "@chakra-ui/react";
-import { CheckCircleIcon, LinkIcon } from "@chakra-ui/icons";
 import { useState, useEffect } from "react";
 import { Nav } from "../components/Nav";
 import useSWR from "swr";
 import { Sidebar } from "../components/Sidebar";
 import { getAllContents } from "../lib/api";
 import { QuickAccess } from "../components/QuickAccess";
+import { Greeting } from "../components/Greeting";
 
 const Index = ({ allContent }) => {
-	//   const fetcher = (args) => fetch(args).then((res) => res.json());
-
-	//   const { data, error } = useSWR("/api/me", fetcher);
-
-	//   if (error) return <div>failed to load</div>;
-	//   if (!data) return <div>loading...</div>;
-
-	// const bg = useColorModeValue("gray.50", "gray.800");
-	// const color = useColorModeValue("brand.white", "brand.black");
 	const docs = [
 		{
 			title: "Getting Started",
-			slug: "getting-started",
+			slug: "/",
 			pages: [
 				{
 					title: "Installation",
-					slug: "installation",
+					slug: "/",
 
 				},
 				{
 					title: "Usage",
-					slug: "usage",
+					slug: "/",
 				},
 				{
 					title: "Customization",
-					slug: "customization",
-
+					slug: "/",
 				}
 			]
 		},
 		{
 			title: "Components",
-			slug: "components",
+			slug: "/",
 			pages: [
 				{
 					title: "Installation",
-					slug: "installation",
+					slug: "/",
 
 				},
 				{
 					title: "Usage",
-					slug: "usage",
+					slug: "/",
 				},
 				{
 					title: "Customization",
-					slug: "customization",
+					slug: "/",
 
 				}
 			]
 		},
 		{
 			title: "Utilities",
-			slug: "utilities",
+			slug: "/",
 			pages: [
 				{
 					title: "Installation",
-					slug: "installation",
+					slug: "/",
 				},
 				{
 					title: "Usage",
-					slug: "usage",
+					slug: "/",
 
 				},
 				{
 					title: "Dark Mode",
-					slug: "dark-mode",
+					slug: "/",
 				}
 			]
 		},
 		{
 			title: "Core Concepts",
-			slug: "core-concepts",
+			slug: "/",
 			pages: [
 				{
 					title: "Installation",
-					slug: "installation",
-				}
+					slug: "/",
+				},
 			]
 		},
 		{
 			title: "Components",
-			slug: "components",
+			slug: "/",
 			pages: [
 				{
 					title: "Installation",
-					slug: "installation",
+					slug: "/",
 
 				},
 				{
 					title: "Usage",
-					slug: "usage",
+					slug: "/",
 				},
 				{
 					title: "Customization",
-					slug: "customization",
+					slug: " / ",
 
 				}
 			]
@@ -126,20 +105,55 @@ const Index = ({ allContent }) => {
 	]
 
 	const sideBar = docs.concat(docs)
-
-	// const bg = useColorModeValue("gray.50", "gray.800");
+	const user = "Hawyar"
 
 	return (
 		<Box>
 			<Nav />
 			<Sidebar docs={sideBar} />
-			<Grid
-				templateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr" }}
-				justifyItems="center"
-				alignItems="center"
+			<Box
+
+				w={["100%", "100%", "calc(100% - (-220px))"]}
+				minH={["100vh", null, null]}
+				position="relative"
+				left={["0px", null, "-220px"]}
+				px={[5, 5, 0, 0]}
+				bg={["white", "blue.400", "red.300"]}
+				zIndex="-33"
+
 			>
-			</Grid>
-			{/* <Sidebar docs={allContent} />
+
+				<Stack spacing={5}>
+					<Box pt="90px" pl={[null, null, 5, "460px"]}>
+						<Greeting greet={user} />
+					</Box>
+				</Stack>
+			</Box>
+		</Box >
+	);
+};
+
+
+
+export default Index;
+
+export async function getStaticProps() {
+	const allContent = getAllContents([
+		"title",
+		"date",
+		"slug",
+		"author",
+		"coverImage",
+		"excerpt",
+	]);
+
+	return {
+		props: { allContent },
+	};
+}
+
+
+{/* <Sidebar docs={allContent} />
         <Box  pl={56}>
           <Stack direction="column" spacing="24px">
             <Heading letterSpacing="-1px" size="xl" fontWeight="bold" pt={16}>
@@ -178,24 +192,3 @@ const Index = ({ allContent }) => {
             })}
           </Box>
         </Flex> */}
-
-		</Box>
-	);
-};
-
-export default Index;
-
-export async function getStaticProps() {
-	const allContent = getAllContents([
-		"title",
-		"date",
-		"slug",
-		"author",
-		"coverImage",
-		"excerpt",
-	]);
-
-	return {
-		props: { allContent },
-	};
-}
